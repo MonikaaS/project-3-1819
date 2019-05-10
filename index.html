@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<head>
+  <title>kandidaatvinden.nl</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <header>
+    <img src="images/Brand.png" class="kv-Brand__logo">
+    kandidaatvinden
+
+    <ul class="kv-NavBar__links">
+      <li class="kv-NavBar__link-item"><a class="kv-NavBar__link kv-NavBar__link--is-active" aria-current="true"
+          href="/app/chat">Chat</a></li>
+      <li class="kv-NavBar__link-item"><a class="kv-NavBar__link" aria-current="false"
+          href="/app/candidates">Kandidaten</a></li>
+    </ul>
+  </header>
+  <secton class="flex">
+    <section class="chats">
+
+    </section>
+    <section>
+      <div class="chatheader">
+        <div class="kv-ChatHeader__title-container">
+          <a class="kv-ChatHeader__title" href="/">CMD Candidate</a>
+          <span class="kv-ChatHeader__location">Noord-Holland</span>
+          <span class="kv-ChatHeader__id">#33</span>
+        </div>
+        <div class="kv-ChatHeader__meta-container">
+          <div class="kv-ChatStatus kv-ChatStatus--with-text"><i class="kv-ChatStatus__indicator"></i><span
+              class="kv-ChatStatus__text">Inactief</span></div><a href="http://localhost:4000/"
+            class="kv-ChatHeader__url">Url: http://localhost:4000/</a>
+        </div>
+      </div>
+      <div id="chatbox">
+        <ul class="messages"></ul>
+      </div>
+      <div id="borderType">
+        <form id="chat" action="">
+          <input type="text" id="m" autocomplete="off" />
+        </form>
+        <button>+</button>
+        <button id="send" class="kv-Button--submit">Send</button>
+      </div>
+    </section>
+
+    <section class="form">
+      <form class="infoform" action="index.html" method="post">
+        <fieldset>
+          <legend>Naam</legend>
+          <input class="form-border" id="intermediarName" type="text" name="name" placeholder="Voornaam">
+          <input class="form-border" id="intermediarTussen" type="text" name="tussen" placeholder="Tussenvoegsel">
+          <input class="form-border" id="intermediarAchter" type="text" name="last" placeholder="Achternaam">
+        </fieldset>
+        <fieldset>
+          <legend>Regio</legend>
+          <select id="#interregio" name="regio">
+            <option value="">Selecteer regio</option disabled selected>
+            <option value="">regio 1</option>
+            <option value="">regio 2</option>
+            <option value="">regio 3</option>
+          </select>
+        </fieldset>
+        <fieldset>
+          <legend>Contactgegevens</legend>
+          <input type="email" id="intermediarmail" name="email" value="" placeholder="E-mailadres">
+          <input id="intermediarNumber" type="number" name="cell" value="" placeholder="Telefoonnummer">
+          <p class="validation">Nummer is niet gevalideert</p>
+        </fieldset>
+        <fieldset>
+          <legend>Functies</legend>
+          <select name="regio">
+            <option value="">Selecteer functie</option disabled selected>
+            <option value="">functie1</option>
+            <option value="">functie2</option>
+            <option value="">functie3</option>
+          </select>
+        </fieldset>
+        <fieldset>
+          <legend>Interessante bedrijven</legend>
+          <select name="regio">
+            <option value="">Selecteer bedrijven</option disabled selected>
+            <option value="">bedrijf1</option>
+            <option value="">bedrijf2</option>
+            <option value="">bedrijf3</option>
+          </select>
+        </fieldset>
+        <fieldset>
+          <legend>Goede lead</legend>
+          <input class="radio" id="yes" type="radio" name="lead" value="true">
+          <label for="yes">Ja</label>
+          <input class="radio" id="no" type="radio" name="lead" value="false">
+          <label for="no">Nee</label>
+        </fieldset>
+        <fieldset>
+          <legend>Notes</legend>
+          <textarea name="notes" rows="8" cols="30" placeholder="Voer extra notities in"></textarea>
+        </fieldset>
+      </form>
+    </section>
+  </secton>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    var form = document.querySelector("#chat");
+    var addUsername = document.querySelector("#addUsername");
+    var message = document.querySelector("#m");
+    var buzzer = document.getElementById("buzzer");
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      socket.emit("chat message", m.value);
+      m.value = "";
+      return false;
+    });
+
+    socket.on("chat message", function (msg) {
+      var newMessage = document.createElement("li")
+      newMessage.className += 'message';
+      newMessage.textContent = msg;
+      document.querySelector(".messages").appendChild(newMessage);
+
+      if (msg.includes('telefoonnummer')) {
+        console.log('ayy')
+
+        var input = document.createElement("input");
+        input.type = "number";
+        input.className += 'input'
+        input.placeholder = "Vul hier je telefoonnummer in"
+        document.querySelector(".messages").appendChild(input)
+
+        var inputCheck = document.createElement("input");
+        inputCheck.type = "checkbox";
+        inputCheck.className += 'inputCheck'
+        document.querySelector(".messages").appendChild(inputCheck)
+
+        document.querySelector(".inputCheck").addEventListener('change', e => {
+          if (document.querySelector(".inputCheck").checked) {
+            socket.emit("validate", "Nummer is gevalideert")
+          } else {
+            socket.emit("validate", "Nummer is niet gevalideert")
+          }
+        })
+
+        document.querySelector(".input").addEventListener('mouseout', e => {
+          socket.emit("phonenumber", document.querySelector(".input").value)
+        })
+      }
+
+      if (msg.includes('naam')) {
+        console.log('naam')
+        var inputName = document.createElement("input");
+        inputName.type = "text";
+        inputName.className += 'inputName'
+        inputName.placeholder = "Vul hier je naam in"
+        document.querySelector(".messages").appendChild(inputName)
+
+        var inputTussen = document.createElement("input");
+        inputTussen.type = "text";
+        inputTussen.className += 'inputTussen'
+        inputTussen.placeholder = "Vul hier je tussenvoegsel in"
+        document.querySelector(".messages").appendChild(inputTussen)
+
+        var inputAchternaam = document.createElement("input");
+        inputAchternaam.type = "text";
+        inputAchternaam.className += 'inputAchternaam'
+        inputAchternaam.placeholder = "Vul hier je tussenvoegsel in"
+        document.querySelector(".messages").appendChild(inputAchternaam)
+
+        document.querySelector(".inputName").addEventListener('mouseout', e => {
+          socket.emit("name", document.querySelector(".inputName").value)
+        })
+
+        document.querySelector(".inputTussen").addEventListener('mouseout', e => {
+          socket.emit("tussen", document.querySelector(".inputTussen").value)
+        })
+
+        document.querySelector(".inputAchternaam").addEventListener('mouseout', e => {
+          socket.emit("achternaam", document.querySelector(".inputAchternaam").value)
+        })
+      }
+      if (msg.includes('email')) {
+        console.log('naam')
+        var inputmail = document.createElement("input");
+        inputmail.type = "text";
+        inputmail.className += 'inputmail'
+        inputmail.placeholder = "Vul hier je mail in"
+        document.querySelector(".messages").appendChild(inputmail)
+
+        document.querySelector(".inputmail").addEventListener('mouseout', e => {
+          socket.emit("email", document.querySelector(".inputmail").value)
+        })
+      }
+      if (msg.includes('regio')) {
+        msg = document.querySelector(".messages")
+
+        var html = `
+        <select id="regio" name="regio">
+            <option value="geen regio geselecteerd">Selecteer regio</option disabled selected>
+            <option value="regio1">regio 1</option>
+            <option value="regio2">regio 2</option>
+            <option value="regio3">regio 3</option>
+          </select>`
+        msg.insertAdjacentHTML('beforeend', html)
+
+        document.querySelector("#regio").addEventListener('change', e => {
+          socket.emit("regio", document.querySelector("#regio").options[document.querySelector("#regio")
+            .selectedIndex].value)
+          console.log('hallo')
+
+          console.log(document.querySelector("#regio").options[document.querySelector("#regio")
+            .selectedIndex].selected)
+        })
+      }
+    });
+
+    socket.on("name", function (value) {
+      console.log(value)
+      document.querySelector(".inputName").value = value
+      document.querySelector("#intermediarName").value = value
+    });
+
+    socket.on("tussen", function (value) {
+      document.querySelector(".inputTussen").value = value
+      document.querySelector("#intermediarTussen").value = value
+    });
+
+    socket.on("achternaam", function (value) {
+      document.querySelector(".inputAchternaam").value = value
+      document.querySelector("#intermediarAchter").value = value
+    });
+
+    socket.on("email", function (value) {
+      document.querySelector(".inputmail").value = value
+      document.querySelector("#intermediarmail").value = value
+    });
+
+    socket.on("phonenumber", function (value) {
+      console.log(value)
+      document.querySelector(".input").value = value
+      document.querySelector("#intermediarNumber").value = value
+    });
+
+    socket.on("validate", function (value) {
+      console.log(value)
+      document.querySelector(".validation").textContent = value;
+    });
+
+    socket.on("regio", function (value) {
+      console.log(value)
+      document.querySelector("#interregio").options.selected = value;
+    });
+  </script>
+</body>
